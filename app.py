@@ -41,7 +41,7 @@ class InferlessPythonModel:
         
         
         inputs = self.tokenizer(user_text, return_tensors="pt").to("cuda")
-        outputs = self.model_mistral.generate(**inputs, max_new_tokens=200)
+        outputs = self.model_mistral.generate(**inputs, max_new_tokens=50)
         generated_text = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
 
         script = generated_text.replace("\n", " ").strip()
