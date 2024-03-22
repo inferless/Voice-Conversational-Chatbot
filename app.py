@@ -43,9 +43,9 @@ class InferlessPythonModel:
         encodeds = self.tokenizer.apply_chat_template(messages, return_tensors="pt",add_generation_prompt=True)
         model_inputs = encodeds.to("cuda")
         
-        generated_ids = model.generate(model_inputs, max_new_tokens=80, do_sample=True,)
+        generated_ids = self.model_mistral.generate(model_inputs, max_new_tokens=80, do_sample=True,)
         # decoded = tokenizer.batch_decode(generated_ids)
-        generated_text = tokenizer.batch_decode(generated_ids[:, encodeds.shape[1]:],skip_special_tokens=True)[0]
+        generated_text = self.tokenizer.batch_decode(generated_ids[:, encodeds.shape[1]:],skip_special_tokens=True)[0]
 
         script = generated_text.replace("\n", " ").strip()
         sentences = nltk.sent_tokenize(script)
