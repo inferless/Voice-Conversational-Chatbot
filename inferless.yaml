@@ -1,6 +1,6 @@
 version: 1.0.0
 
-name: Bark
+name: Voicebot
 import_source: GIT
 
 # you can choose the options between ONNX, TENSORFLOW, PYTORCH
