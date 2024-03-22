@@ -6,7 +6,7 @@ import numpy as np
 import io
 import base64
 import soundfile as sf
-
+import nltk
 
 class InferlessPythonModel:  
     def initialize(self):
@@ -43,8 +43,17 @@ class InferlessPythonModel:
         outputs = self.model_mistral.generate(**inputs, max_new_tokens=200)
         generated_text = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
 
-
-        audio_array = generate_audio(generated_text)
+        script = generated_text.replace("\n", " ").strip()
+        sentences = nltk.sent_tokenize(script)
+        SPEAKER = "v2/en_speaker_6"
+        silence = np.zeros(int(0.25 * SAMPLE_RATE))  # quarter second of silence
+        
+        pieces = []
+        for sentence in sentences:
+            audio_array = generate_audio(sentence, history_prompt=SPEAKER)
+            pieces += [audio_array, silence.copy()]
+            
+        audio_array = generate_audio(generated_text,history_prompt="v2/en_speaker_1")
         buffer = io.BytesIO()
         sf.write(buffer, audio_array,SAMPLE_RATE, format='WAV')
         buffer.seek(0)
