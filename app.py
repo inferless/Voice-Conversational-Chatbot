@@ -24,6 +24,7 @@ class InferlessPythonModel:
         self.tokenizer = AutoTokenizer.from_pretrained(model_id)
         
         # Load Bark, Text to Speech
+        nltk.download('punkt')
         preload_models()
     
     def base64_to_mp3(self, base64_data, output_file_path):
@@ -52,10 +53,9 @@ class InferlessPythonModel:
         for sentence in sentences:
             audio_array = generate_audio(sentence, history_prompt=SPEAKER)
             pieces += [audio_array, silence.copy()]
-            
-        audio_array = generate_audio(generated_text,history_prompt="v2/en_speaker_1")
+                
         buffer = io.BytesIO()
-        sf.write(buffer, audio_array,SAMPLE_RATE, format='WAV')
+        sf.write(buffer, np.concatenate(pieces),SAMPLE_RATE, format='WAV')
         buffer.seek(0)
         base64_audio = base64.b64encode(buffer.read()).decode('utf-8')
         
