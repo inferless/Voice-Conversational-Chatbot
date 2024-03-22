@@ -36,10 +36,10 @@ class InferlessPythonModel:
         audio_file = "output.mp3"
         self.base64_to_mp3(audio_data,audio_file)
         segments, info = self.model_whisper.transcribe(audio_file, beam_size=5)
-        text = ''.join([segment.text for segment in segments])
+        user_text = ''.join([segment.text for segment in segments])
         
         
-        inputs = self.tokenizer(text, return_tensors="pt").to("cuda")
+        inputs = self.tokenizer(user_text, return_tensors="pt").to("cuda")
         outputs = self.model_mistral.generate(**inputs, max_new_tokens=200)
         generated_text = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
 
@@ -50,6 +50,6 @@ class InferlessPythonModel:
         buffer.seek(0)
         base64_audio = base64.b64encode(buffer.read()).decode('utf-8')
         
-        return {"generated_audio_base64": base64_audio}
+        return {"user_question":user_text,"bot_answer":generated_text,"generated_audio_base64": base64_audio}
     def finalize(self):
         pass
