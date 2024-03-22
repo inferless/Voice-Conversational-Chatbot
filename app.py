@@ -38,11 +38,14 @@ class InferlessPythonModel:
         self.base64_to_mp3(audio_data,audio_file)
         segments, info = self.model_whisper.transcribe(audio_file, beam_size=5)
         user_text = ''.join([segment.text for segment in segments])
+
+        messages = [{"role": "user", "content": f"You are a helpful, respectful and honest assistant. Answer the following question in exactly in few words from the context. {user_text}"}]
+        encodeds = self.tokenizer.apply_chat_template(messages, return_tensors="pt",add_generation_prompt=True)
+        model_inputs = encodeds.to("cuda")
         
-        
-        inputs = self.tokenizer(user_text, return_tensors="pt").to("cuda")
-        outputs = self.model_mistral.generate(**inputs, max_new_tokens=50)
-        generated_text = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
+        generated_ids = model.generate(model_inputs, max_new_tokens=80, do_sample=True,)
+        # decoded = tokenizer.batch_decode(generated_ids)
+        generated_text = tokenizer.batch_decode(generated_ids[:, encodeds.shape[1]:],skip_special_tokens=True)[0]
 
         script = generated_text.replace("\n", " ").strip()
         sentences = nltk.sent_tokenize(script)
