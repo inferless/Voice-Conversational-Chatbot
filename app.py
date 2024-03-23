@@ -6,7 +6,6 @@ import io
 import base64
 import soundfile as sf
 import nltk
-import time
 
 class InferlessPythonModel:
     def initialize(self):
@@ -38,10 +37,8 @@ class InferlessPythonModel:
         self.base64_to_mp3(audio_data, self.audio_file)
         
         # Transcribe audio to text
-        start_time_1 = time.perf_counter()
         segments, info = self.model_whisper.transcribe(self.audio_file, beam_size=5)
         user_text = ''.join([segment.text for segment in segments])
-        end_time_1 = time.perf_counter() - start_time_1
         
         # Generate prompt for Mistral model
         messages = [{"role": "user", "content": f"You are a helpful, respectful and honest assistant. Answer the following question in exactly in few words from the context. {user_text}"}]
@@ -49,11 +46,9 @@ class InferlessPythonModel:
         model_inputs = encodeds.to("cuda")
         
         # Generate text response using Mistral model
-        start_time_2 = time.perf_counter()
         generated_ids = self.model_mistral.generate(model_inputs, max_new_tokens=80, do_sample=True)
         generated_text = self.tokenizer.batch_decode(generated_ids[:, encodeds.shape[1]:], skip_special_tokens=True)[0]
         
-        end_time_2 = time.perf_counter() - start_time_2
         # Process generated text into audio
         script = generated_text.replace("\n", " ").strip()
         sentences = nltk.sent_tokenize(script)
@@ -62,19 +57,17 @@ class InferlessPythonModel:
         
         pieces = []
         
-        start_time_3 = time.perf_counter()
         for sentence in sentences:
             audio_array = generate_audio(sentence, history_prompt=self.SPEAKER)
             pieces += [audio_array, silence.copy()]
         
-        end_time_3 = time.perf_counter() - start_time_3
         # Convert audio pieces into base64
         buffer = io.BytesIO()
         sf.write(buffer, np.concatenate(pieces), SAMPLE_RATE, format='WAV')
         buffer.seek(0)
         base64_audio = base64.b64encode(buffer.read()).decode('utf-8')
          
-        return {"end_time_1":end_time_1,"end_time_2":end_time_2,"end_time_3":end_time_3,"generated_audio_base64": base64_audio}
+        return {"generated_audio_base64": base64_audio}
 
     def finalize(self):
         # Finalize resources if needed
