@@ -6,6 +6,7 @@ import io
 import base64
 import soundfile as sf
 import nltk
+import os
 
 class InferlessPythonModel:
     def initialize(self):
@@ -13,11 +14,12 @@ class InferlessPythonModel:
         self.audio_file = "output.mp3"
         model_size = "large-v3"
         self.model_whisper = WhisperModel(model_size, device="cuda", compute_type="float16")
-        
+
+        token = os.getenv('HUGGINGFACE_AUTH_TOKEN')
         # Load Mistral instruct, text to text model
         model_id = "mistralai/Mistral-7B-Instruct-v0.2"
-        self.model_mistral = AutoModelForCausalLM.from_pretrained(model_id).to("cuda")
-        self.tokenizer = AutoTokenizer.from_pretrained(model_id)
+        self.model_mistral = AutoModelForCausalLM.from_pretrained(model_id, use_auth_token=token).to("cuda")
+        self.tokenizer = AutoTokenizer.from_pretrained(model_id, use_auth_token=token)
         
         # Load Bark, Text to Speech
         self.SPEAKER = "v2/en_speaker_6"
