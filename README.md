@@ -31,7 +31,7 @@ After the create model step, while setting the configuration for the model make 
 
 ### ADD your HF token as an Env Variable during import ( Step 4 ) :
 
-Add 
+Add 'HUGGINGFACE_AUTH_TOKEN' in the Env variable with the value of the read token for repo 'mistralai/Mistral-7B-Instruct-v0.2' ( Make sure you have access to this in HF ) https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.2
 
 Enter all the required details to Import your model. Refer [this link](https://docs.inferless.com/integrations/github-custom-code) for more information on model import.
 
