@@ -1,3 +1,6 @@
+import os
+os.environ["HF_HUB_ENABLE_HF_TRANSFER"]='1'
+from huggingface_hub import snapshot_download
 from faster_whisper import WhisperModel
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from bark import SAMPLE_RATE, generate_audio, preload_models
@@ -18,6 +21,7 @@ class InferlessPythonModel:
         token = os.getenv('HUGGINGFACE_AUTH_TOKEN')
         # Load Mistral instruct, text to text model
         model_id = "mistralai/Mistral-7B-Instruct-v0.2"
+        snapshot_download(repo_id=model_id,allow_patterns=["*.safetensors"])
         self.model_mistral = AutoModelForCausalLM.from_pretrained(model_id, use_auth_token=token).to("cuda")
         self.tokenizer = AutoTokenizer.from_pretrained(model_id, use_auth_token=token)
         
